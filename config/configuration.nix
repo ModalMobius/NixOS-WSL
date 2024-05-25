@@ -1,53 +1,51 @@
 { config, lib, pkgs, ... }:
 
 {
-    imports = [ <nixos-wsl/modules> ];
-    wsl.enable = true;
-    wsl.defaultUser = "nixos";
-
-    system.stateVersion = "23.11";
-
-    nixpkgs.config.allowUnfree = true;
-
-    nix = {
-        settings = {
-            experimental-features = [
-                "nix-command"
-                "flakes"
-            ];
-            substituters = [
-                "https://nix-community.cachix.org"
-            ];
-            trusted-public-keys = [
-                "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
-            ];
-        };
-        gc = {
-            automatic = true;
-                dates = "weekly";
-                options = "--delete-older-than 7d";
-        };
+  imports = [ <nixos-wsl/modules> ];
+  wsl.enable = true;
+  wsl.defaultUser = "nixos";
+  system.stateVersion = "23.11";
+  nixpkgs.config.allowUnfree = true;
+  nix = {
+    settings = {
+      experimental-features = [ "nix-command" "flakes" ];
     };
-    networking.hostName = "wsl";
-    systemd = {
-        services.clear-log = {
-            description = "Clear 1> day-old logs";
-            serviceConfig = {
-                Type = "oneshot";
-                ExecStart = "${pkgs.systemd}/bin/journalctl --vacuum-time=1d";
-            };
-        };
-        timers.clear-log = {
-            wantedBy = [ "timers.target" ];
-            partOf = [ "clear-log.service" ];
-            timerConfig.OnCalendar = "daily UTC";
-        };
+    gc = {
+      automatic = true;
+      dates = "daily";
+      options = "-d";
     };
-    environment.systemPackages = with pkgs; [
-        nixFlakes
-        vscode-with-extensions
-    ];
-    environment.variables = {
-        DONT_PROMPT_WSL_INSTALL = "1";        
+  };
+  networking.hostName = "wsl";
+  systemd = {
+    services.clear-log = {
+      description = "Clear 1> day-old logs";
+      serviceConfig = {
+        Type = "oneshot";
+        ExecStart = "${pkgs.systemd}/bin/journalctl --vacuum-time=1d";
+      };
     };
+    timers.clear-log = {
+      wantedBy = [ "timers.target" ];
+      partOf = [ "clear-log.service" ];
+      timerConfig.OnCalendar = "daily UTC";
+    };
+  };
+  environment.systemPackages = with pkgs; [
+    nixFlakes
+    git
+    (vscode-with-extensions.override {
+       vscodeExtensions = with vscode-extensions; [
+         svelte.svelte-vscode
+         arcticicestudio.nord-visual-studio-code
+       ]
+    })
+  ];
+  environment.variables = {
+    DONT_PROMPT_WSL_INSTALL = "1";
+  };
+  programs.direnv = {
+    enable = true;
+    nix-direnv.enable = true;
+ };
 }
