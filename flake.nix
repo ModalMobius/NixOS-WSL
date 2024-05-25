@@ -33,7 +33,7 @@
               enable = true;
               nativeSystemd = lib.mkIf legacy false;
               startMenuLaunchers = true;
-              tarball.configPath = ./config.nix;
+              tarball.configPath = ./config;
             };
             networking.hostName = "wsl";
             programs.bash.loginShellInit = "nixos-wsl-welcome";
