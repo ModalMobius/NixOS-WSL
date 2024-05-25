@@ -7,6 +7,8 @@
 
     system.stateVersion = "23.11";
 
+    nixpkgs.config.allowUnfree = true;
+
     nix = {
         settings = {
             experimental-features = [
@@ -41,8 +43,11 @@
             timerConfig.OnCalendar = "daily UTC";
         };
     };
-    environment.packages = with pkgs; [
+    environment.systemPackages = with pkgs; [
         nixFlakes
         vscode-with-extensions
     ];
+    environment.variables = {
+        DONT_PROMPT_WSL_INSTALL = "1";        
+    };
 }
