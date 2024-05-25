@@ -29,8 +29,13 @@
       nixosConfigurations =
         let
           config = { legacy ? false }: { config, lib, pkgs, ... }: {
-            wsl.enable = true;
-            wsl.nativeSystemd = lib.mkIf legacy false;
+            wsl = {
+              enable = true;
+              nativeSystemd = lib.mkIf legacy false;
+              startMenuLaunchers = true;
+              tarball.configPath = ./config.nix;
+            };
+            networking.hostName = "wsl";
             programs.bash.loginShellInit = "nixos-wsl-welcome";
             systemd.tmpfiles.rules =
               let
